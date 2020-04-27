@@ -1,0 +1,32 @@
+
+Version 1.1.0
+Changed config file and saving operation of config file
+Added text to tile
+
+
+Version 1.0.0
+- First edition of the "doorcam" app. This app loads a jpg file every 1 seconds from a http URL when the app is trigered from the tile or from Domoticz.
+
+How it works:
+
+1. There must be added a new string variable to Domoticz "ShowDoorCamToon". Set this to "150".
+2. A new timer is created to the webcam widget (3 seconds).
+3. Every timer instance a get HTTP is send to Domoticz requesting the variable status of "ShowDoorCamToon".
+4. The result is JSON so JSON is parsed and the variable result.value is checked.
+5. If result is "200" then the camera app is shown full screen on Toon.
+6. After the camera app is full screen a get HTTP is send to Domoticz setting the value of "ShowDoorCamToon" to 150.
+7. The widget is still checking the Domoticz variable "ShowDoorCamToon" every 3 seconds.
+8. If result is "100" then the camera app is closed (hidden).
+
+What to do to make it work:
+
+There must be added a new string variable to Domoticz "ShowDoorCamToon". Set this to "150".
+Make sure that when the doorbell rings, the Domoticz variable will be set to "200".
+
+Configuration od the doorcam App in Toon:
+"camURL" : this is the url of the camera to the snapshot (e.g. "http://admin:admin@192.168.10.188/snap.jpg")
+"domURL" : this is the path to Domoticz including port (e.g. "http://192.168.10.186:8080)
+"idx"    : this is the number of the variable made in Domoticz (e.g. "27") 
+"var"    : this is the name of the variable made in Domoticz (e.g. "ShowDoorCamToon")
+
+
