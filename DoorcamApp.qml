@@ -23,7 +23,7 @@ App {
 	property int 		pictureCountdownCounter: 10
 	property int 		doorcamTimer1Interval: 1000
 	property bool 		doorcamTimer1Running: false
-	property string 	doorcamImageURL1 : "drawables/connect.jpg"
+	property string 	doorcamImageURL1 : "qrc:/tsc/connect.jpg"
 	property string 	domoticzURL1 : "http://192.168.10.185:8080"
 	property string 	domoticzIDX : "27"
 	property string 	domoticzVAR : "ShowDoorCamToon"
@@ -38,7 +38,7 @@ App {
 
 	FileIO {
 		id: doorcamSettingsFile
-		source: "file:///qmf/qml/apps/doorcam/config.json"
+		source: "file:///mnt/data/tsc/doorcam_userSettings.json"
  	}
 
 	QtObject {
@@ -129,7 +129,7 @@ App {
 			"var" : domoticzVAR
 		}
   		var doc3 = new XMLHttpRequest();
-   		doc3.open("PUT", "file:///qmf/qml/apps/doorcam/config.json");
+   		doc3.open("PUT", "file:///mnt/data/tsc/doorcam_userSettings.json");
    		doc3.send(JSON.stringify(setJson));
 	}
 
