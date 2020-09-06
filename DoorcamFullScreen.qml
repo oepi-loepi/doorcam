@@ -66,7 +66,7 @@ Screen {
 		id: doorcamImage1
 		width: app.enableForceMode? parent.width - 110 : parent.width
 		height: parent.height - 30
-		fillMode: app.enableForceMode? Image.Image.Stretch : Image.PreserveAspectFit
+		fillMode: app.enableForceMode? Image.Stretch : Image.PreserveAspectFit
 		source: app.doorcamImage1Source
 		anchors {
 			horizontalCenter: parent.horizontalCenter
@@ -90,7 +90,7 @@ Screen {
 		id: doorcamImage2
 		width: app.enableForceMode? parent.width - 110 : parent.width
 		height: parent.height - 30
-		fillMode: app.enableForceMode? Image.Image.Stretch : Image.PreserveAspectFit
+		fillMode: app.enableForceMode? Image.Stretch : Image.PreserveAspectFit
 		source: app.doorcamImage2Source
 		anchors {
 			horizontalCenter: parent.horizontalCenter
