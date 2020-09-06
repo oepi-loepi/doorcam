@@ -56,7 +56,8 @@ Screen {
 
         	doc.setRequestHeader("Content-Encoding", "UTF-8");
         	doc.send();
-		app.doorcamImage2Source = "drawables/connect.jpg";
+		app.doorcamImage1Source = "qrc:/tsc/connect.jpg";
+		app.doorcamImage2Source = "qrc:/tsc/connect.jpg";
 		this.close();
 	}
 
