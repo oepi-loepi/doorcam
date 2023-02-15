@@ -10,85 +10,87 @@ Tile {
 	onClicked: {
 		if (app.doorcamFullScreen) {
 			app.doorcamFullScreen.show();
-			console.log("webcam: app.doorcamFullScreen.show() called")
+			if (app.debugOutput) console.log("doorcam: app.doorcamFullScreen.show() called")
 		}
 	}
 
  	function getDOM() {
-        	var doc = new XMLHttpRequest();
-        	doc.onreadystatechange = function() {
-            		if (doc.readyState == XMLHttpRequest.DONE) {
-				var JsonString = doc.responseText;
-        			var JsonObject= JSON.parse(JsonString);
+		if (app.debugOutput) console.log("doorcam: checking")
+		var doc = new XMLHttpRequest();
+		doc.onreadystatechange = function() {
+			if (doc.readyState == XMLHttpRequest.DONE) {
+				if (doc.status === 200 || http.status === 300  || http.status === 302) {
+					if (app.debugOutput) console.log("doorcam: responseText: " +  doc.responseText)
+					var JsonString = doc.responseText;
+					var JsonObject= JSON.parse(JsonString);
+					var aString = JsonObject.result[0].Value;
+					if (app.debugOutput) console.log("doorcam: aString: " +  aString)
 
-        			//retrieve values from JSON again
-        			var aString = JsonObject.result[0].Value;
+					if (aString == "100"){
+						if (app.doorcamFullScreen) {
+							//app.doorcamFullScreen.showMinimized();
+							app.doorcamFullScreen.hide();
+							if (app.debugOutput) console.log("doorcam: app.webcamFullScreen.hide() called")
+						}
+					}
 
-				if (aString == "100"){
-					if (app.doorcamFullScreen) {
-						//app.doorcamFullScreen.showMinimized();
-						app.doorcamFullScreen.hide();
-						console.log("webcam: app.webcamFullScreen.hide() called")
+					if (aString == "200"){
+						if (app.doorcamFullScreen) {
+							app.doorcamFullScreen.show();
+							if (app.debugOutput) console.log("doorcam: app.webcamFullScreen.show() called")
+						}
 					}
 				}
-
-				if (aString == "200"){
-					if (app.doorcamFullScreen) {
-						app.doorcamFullScreen.show();
-						console.log("webcam: app.webcamFullScreen.show() called")
-					}
-				}
-
-				//mainText.text = doc.responseText;
-            		}
-        	}
+			}
+		}
 		var domURL2 = app.domoticzURL1
 		domURL2 += "/json.htm?type=command&param=getuservariable&idx="
 		domURL2 += app.domoticzIDX
 		doc.open("get", domURL2);
-        	doc.setRequestHeader("Content-Encoding", "UTF-8");
-        	doc.send();
+		doc.setRequestHeader("Content-Encoding", "UTF-8");
+		doc.send();
    	 }
 
 
  	function getha() {
-        	var doc = new XMLHttpRequest();
-        	doc.onreadystatechange = function() {
-            		if (doc.readyState == XMLHttpRequest.DONE) {
-				var JsonString = doc.responseText;
+		var doc = new XMLHttpRequest();
+		doc.onreadystatechange = function() {
+			if (doc.readyState == XMLHttpRequest.DONE) {
+				if (doc.status === 200 || http.status === 300  || http.status === 302) {
+					var JsonString = doc.responseText;
 
-                                console.log(JsonString)
+					if (app.debugOutput) console.log(JsonString)
 
-        			var JsonObject = JSON.parse(JsonString);
-        			//retrieve values from JSON again
-        			var aString = JsonObject.state;
+					var JsonObject = JSON.parse(JsonString);
+					//retrieve values from JSON again
+					var aString = JsonObject.state;
 
-				if (aString == "100.0"){
-					if (app.doorcamFullScreen) {
-						//app.doorcamFullScreen.showMinimized();
-						app.doorcamFullScreen.hide();
-						console.log("webcam: app.webcamFullScreen.hide() called")
+					if (aString == "100.0"){
+						if (app.doorcamFullScreen) {
+							//app.doorcamFullScreen.showMinimized();
+							app.doorcamFullScreen.hide();
+							if (app.debugOutput) console.log("doorcam: app.webcamFullScreen.hide() called")
+						}
 					}
-				}
 
-				if (aString == "200.0"){
-					if (app.doorcamFullScreen) {
-						app.doorcamFullScreen.show();
-						console.log("webcam: app.webcamFullScreen.show() called")
+					if (aString == "200.0"){
+						if (app.doorcamFullScreen) {
+							app.doorcamFullScreen.show();
+							if (app.debugOutput) console.log("doorcam: app.webcamFullScreen.show() called")
+						}
 					}
+
 				}
+			}
+		}
+		var haURl2 = app.haURL1
+		haURl2 += "/api/states/"
+		haURl2 += app.haEntity_id
 
-				//mainText.text = doc.responseText;
-            		}
-        	}
-                var haURl2 = app.haURL1
-                haURl2 += "/api/states/"
-                haURl2 += app.haEntity_id
-
-                doc.open("GET", haURl2, true);
-                doc.setRequestHeader("Authorization", "Bearer " + app.haToken);
-                doc.setRequestHeader("Content-Type", "application/json");
-        	doc.send();
+		doc.open("GET", haURl2, true);
+		doc.setRequestHeader("Authorization", "Bearer " + app.haToken);
+		doc.setRequestHeader("Content-Type", "application/json");
+		doc.send();
    	 }
 
 	Image {

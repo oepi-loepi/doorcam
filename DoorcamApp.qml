@@ -5,12 +5,14 @@ import FileIO 1.0
 
 App {
 	id: doorcamApp
-
+	property bool  		debugOutput : false
+	
+	property bool  		needRestart : false
 	property url 		tileUrl : "DoorcamTile.qml"
 	property url 		thumbnailIcon: "qrc:/tsc/doorcam.png"
-	property 		DoorcamFullScreen doorcamFullScreen
-	property 		DoorcamConfigScreen doorcamConfigScreen
-	property 		DoorcamTile doorcamTile
+	property 			DoorcamFullScreen doorcamFullScreen
+	property 			DoorcamConfigScreen doorcamConfigScreen
+	property 			DoorcamTile doorcamTile
 
 	property string 	doorcamImage1Source
 	property string 	doorcamImage2Source
@@ -34,6 +36,10 @@ App {
 	property string 	haURL1 : "http://192.168.10.18:8123"
 	property string 	haEntity_id : "entity_id"
 	property string 	haToken : "haToken"
+	property bool 		cgiMode: false
+	property string 	tmpcgiMode: "Yes"
+	property url 		imageJPG : ""
+	
 
 // user settings from config file
 	property variant doorcamSettingsJson : {
@@ -45,8 +51,8 @@ App {
 		'haURL1': "",
 		'haEntity_id': "",
 		'haToken': "",
-		'tmpdomMode': ""
-
+		'tmpdomMode': "",
+		"cgiMode": ""
 	}
 
 	FileIO {
@@ -86,13 +92,12 @@ App {
 				enableForceMode = false
 			}
 
-
 			if (doorcamSettingsJson['tmpdomMode'] == "Domoticz") {
 				domMode = true
 			} else {
 				domMode = false
 			}
-
+			
 			doorcamImageURL1 = doorcamSettingsJson['camURL'];
 			domoticzURL1 = doorcamSettingsJson['domURL'];
 			domoticzIDX = doorcamSettingsJson['idx'];
@@ -103,17 +108,62 @@ App {
 
 		} catch(e) {
 		}
+		
+		try {
+			doorcamSettingsJson = JSON.parse(doorcamSettingsFile.read());
+			if (doorcamSettingsJson['cgiMode'] == "Yes") {
+				cgiMode = true
+			} else {
+				cgiMode = false
+			}
+		} catch(e) {
+		}
+		if (debugOutput) console.log("cgiMode:" + cgiMode)
 		listProperty(screenStateController)
 	}
+	
+	
+	function getWebcamImage() {
+		if(cgiMode & (pictureCycleCounter == 0 || pictureCycleCounter ==2)){
+			if (debugOutput) console.log("webcam: getWebcamImage called")
+			//get the url of the jpg from the cgi stream
+			var http = new XMLHttpRequest();
+			if (debugOutput) console.log("webcam: doorcamImageURL1: " + doorcamImageURL1)
+			http.open("GET", doorcamImageURL1, true)
+			
+			http.onreadystatechange = function() {
+				if (http.readyState == XMLHttpRequest.DONE) {
+					if (http.status === 200 || http.status === 300  || http.status === 302) {
+						var response = http.responseText
+						if (debugOutput) console.log ("*********webcam response: " + response)
+						var wbURL = doorcamImageURL1.toString()
+						var n101 = wbURL.indexOf("http://") + "http://".length
+						var n102 = wbURL.indexOf("/", n101)
+						
+						var n201 = response.indexOf("../tmpfs") + "..".length
+						var n202 = response.indexOf("\"", n201)
+						imageJPG = "http://" + wbURL.substring(n101, n102)  + response.substring(n201, n202)
+						if (debugOutput) console.log ("*********webcam imageJPG: " + imageJPG)
+						updateDoorcamImage1();
+					}
+				}
+			}
+			http.send();
+		}else{
+			imageJPG = doorcamImageURL1;
+			updateDoorcamImage1();
+		}
+	}
+	
 
 	function updateDoorcamImage1() {
 		if (doorcamFullScreen.visible){
 			
-			console.log("doorcam: updateDoorcamImage1() called")
+			if (debugOutput) console.log("doorcam: updateDoorcamImage1() called")
 			switch(pictureCycleCounter) {
 			case 0:
 				doorcamImage2Source = ""
-				doorcamImage2Source = doorcamImageURL1
+				doorcamImage2Source = imageJPG
 				pictureCycleCounter = pictureCycleCounter + 1
 				break
 			case 1:
@@ -126,7 +176,7 @@ App {
 				break
 			case 2:
 				doorcamImage1Source = ""
-				doorcamImage1Source = doorcamImageURL1
+				doorcamImage1Source = imageJPG
 				pictureCycleCounter = pictureCycleCounter + 1
 				break
 			case 3:
@@ -147,10 +197,12 @@ App {
 		triggeredOnStart: true
 		running: doorcamTimer1Running
 		repeat: true
-		onTriggered: updateDoorcamImage1()
+		onTriggered: getWebcamImage() 
 	}
 
 	function saveSettings() {
+		if (debugOutput) console.log("doorcam: saveSettings called")
+		
 		if (enableForceMode == true) {
 			tmpForceMode = "Yes";
 		} else {
@@ -162,6 +214,12 @@ App {
 		} else {
 			tmpdomMode = "HA";
 		}
+		
+		if (cgiMode == true) {
+			tmpcgiMode = "Yes";
+		} else {
+			tmpcgiMode = "No";
+		}
 
  		var setJson = {
 			"camURL" : doorcamImageURL1,
@@ -172,13 +230,30 @@ App {
 			"entity_id" : haEntity_id,
 			"token" : haToken,
 			"tmpForceMode" : tmpForceMode,
-			"tmpdomMode" : tmpdomMode
-
+			"tmpdomMode" : tmpdomMode,
+			"cgiMode" : tmpcgiMode
 		}
 
+		if (debugOutput) console.log("doorcam: setJson: " + setJson);
+		
   		var doc3 = new XMLHttpRequest();
    		doc3.open("PUT", "file:///mnt/data/tsc/doorcam_userSettings.json");
    		doc3.send(JSON.stringify(setJson));
+		if (needRestart){
+			console.log("*********Doorcam restart")
+			rebootTimer.running = true
+		}
+	}
+	
+	Timer {
+		id: rebootTimer
+		interval: 2000
+		repeat:false
+		running: false
+		triggeredOnStart: false
+		onTriggered: {
+			Qt.quit()
+		}
 	}
 
 }

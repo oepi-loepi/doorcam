@@ -15,7 +15,11 @@ Screen {
 		console.log("webcam: WebcamFullScreen.onShown() called")
 		addCustomTopRightButton("Configuratie")
 		screenStateController.screenColorDimmedIsReachable = false
-		app.doorcamTimer1Interval = 1000
+		if (app.cgiMode){
+			app.doorcamTimer1Interval = 2000
+		}else{
+			app.doorcamTimer1Interval = 1000
+		}
 		app.pictureCountdownCounter = app.pictureCountdownCounterStart
 		app.doorcamTimer1Running = true
 		if (app.domMode){

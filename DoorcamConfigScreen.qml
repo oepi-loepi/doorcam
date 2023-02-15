@@ -4,9 +4,11 @@ import qb.components 1.0
 Screen {
 	id: doorcamConfigScreen
 	screenTitle: "Doorcam app Setup"
+	property bool	tempenableCGIMode: app.cgiMode
+	property url 	tempImageUrl :app.doorcamImageURL1
 
 	onShown: {
-		doorcamImageURL1.inputText = app.doorcamImageURL1;
+		doorcamImageURL1.inputText = tempImageUrl ;
 		domoticzURL1.inputText = app.domoticzURL1;
 		domoticzIDX.inputText= app.domoticzIDX;
 		domoticzVAR.inputText= app.domoticzVAR;
@@ -16,19 +18,28 @@ Screen {
 		haURL1.inputText = app.haURL1;
 		haEntity_id.inputText= app.haEntity_id;
 		haToken.inputText= app.haToken;
+		enableCGIMode.isSwitchedOn = tempenableCGIMode
 
 		addCustomTopRightButton("Save");
 	}
 
 	onCustomButtonClicked: {
+		if (app.cgiMode != tempenableCGIMode || app.doorcamImageURL1 != tempImageUrl) app.needRestart = true 
+		app.cgiMode = tempenableCGIMode;
+		app.doorcamImageURL1 = tempImageUrl;
+		if (app.needRestart){
+			addCustomTopRightButton("Wait for reboot");
+		}
 		app.saveSettings();
-		hide();
+		if (!app.needRestart){
+			hide()
+		}
 	}
 
 
 	function savedoorcamImageURL1(text) {
 		if (text) {
-			app.doorcamImageURL1 = text;
+			tempImageUrl = text;
 		}
 	}
 
@@ -69,19 +80,6 @@ Screen {
 	}
 
 
-	Text {
-		id: myLabel
-		text: "Example of valid URL: http://192.168.10.8/live/1/jpeg.jpg :"
-		font.pixelSize:  isNxt ? 20 : 16
-		font.family: qfont.regular.name
-		anchors {
-			left: parent.left
-			top: parent.top
-			leftMargin: 20
-			topMargin: 15
-		}
-	}
-
 	EditTextLabel4421 {
 		id: doorcamImageURL1
 		width: parent.width - 40
@@ -91,9 +89,9 @@ Screen {
 
 		anchors {
 			left: parent.left
-			top: myLabel.bottom
+			top: parent.top
 			leftMargin: 20
-			topMargin: isNxt ? 10 : 8
+			topMargin: isNxt ? 8 : 6
 		}
 
 		onClicked: {
@@ -101,19 +99,94 @@ Screen {
 		}
 	}
 
-
 	Text {
-		id: domhaMode
-		width:  160
-		text: "HA - Domoticz"
-		font.pixelSize:  isNxt ? 20 : 16
-		font.family: qfont.regular.name
-
+		id: myLabel
+		text: "Example of valid JPG URL: http://192.168.42.8/live/1/jpeg.jpg"
+		font {
+			family: qfont.regular.name
+			pixelSize: isNxt ? 18:14
+		}
 		anchors {
 			left: parent.left
 			top: doorcamImageURL1.bottom
 			leftMargin: 20
-			topMargin: 15
+			rightMargin: 20
+			topMargin: isNxt ? 8 : 6
+			bottomMargin: 20
+		}
+	}
+	
+	Text {
+		id: myLabel2
+		text: "Example of valid CGI URL: http://192.168.1.6/cgi-bin/hi3510/param.cgi?cmd=snap&-getpic"
+		font {
+			family: qfont.regular.name
+			pixelSize: isNxt ? 18:14
+		}
+		anchors {
+			left: parent.left
+			top: myLabel.bottom
+			leftMargin: 20
+			rightMargin: 20
+			topMargin: isNxt ? 8 : 6
+			bottomMargin: 20
+		}
+	}
+	Text {
+		id: cgiModeTXT
+		width:  160
+		text: "JPG Mode"
+		font.family: qfont.regular.name
+		font.pixelSize: isNxt ? 18:14
+		anchors {
+			left: myLabel.left
+			top:myLabel2.bottom
+			topMargin: isNxt ? 8 : 6
+		}
+	}
+
+	OnOffToggle {
+		id: enableCGIMode
+		height:  30
+		leftIsSwitchedOn: false
+		anchors {
+			left: cgiModeTXT.right
+			leftMargin: isNxt ? 60 : 48
+			top: cgiModeTXT.top		
+		}
+		onSelectedChangedByUser: {
+			if (isSwitchedOn) {
+				tempenableCGIMode = true;
+			} else {
+				tempenableCGIMode = false;		
+			}
+		}
+	}
+
+	Text {
+		id: jpgModeTXT
+		width:  160
+		text: "CGI Mode (hi3510 camera)"
+		font.family: qfont.regular.name
+		font.pixelSize: isNxt ? 18:14
+		anchors {
+			left: enableCGIMode.right
+			leftMargin: isNxt ? 65 : 25
+			top: cgiModeTXT.top		
+		}
+	}
+	Text {
+		id: domhaMode
+		width:  160
+		text: "HA - Domoticz"
+		font.pixelSize: isNxt ? 18:14
+		font.family: qfont.regular.name
+
+		anchors {
+			left: parent.left
+			top: cgiModeTXT.bottom
+			leftMargin: 20
+			topMargin: isNxt ? 20 : 16
 		}
 	}
 
@@ -135,15 +208,15 @@ Screen {
 
 
 	Text {
-		id: myLabel2
+		id: myLabel5
 		text: "Example of valid URL: http://192.168.10.185:8080 :"
-		font.pixelSize:  isNxt ? 20 : 16
+		font.pixelSize: isNxt ? 18:14
 		font.family: qfont.regular.name
 		anchors {
 			left: parent.left
 			top: domhaToggle.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 20 : 15
+			topMargin: isNxt ? 8 : 6
 		}
 		visible: app.domMode
 	}
@@ -158,9 +231,9 @@ Screen {
 
 		anchors {
 			left: parent.left
-			top: myLabel2.bottom
+			top: myLabel5.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 10 : 8
+			topMargin: isNxt ? 8 : 6
 		}
 
 		onClicked: {
@@ -170,15 +243,15 @@ Screen {
 	}
 
 	Text {
-		id: myLabel3
+		id: myLabel6
 		text: "IDX of the doorbell variable in Domoticz created by script. Example : 27"
-		font.pixelSize:  isNxt ? 20 : 16
+		font.pixelSize: isNxt ? 18:14
 		font.family: qfont.regular.name
 		anchors {
 			left: parent.left
 			top: domoticzURL1.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 20 : 15
+			topMargin: isNxt ? 8 : 6
 		}
 		visible: app.domMode
 	}
@@ -191,9 +264,9 @@ Screen {
 		leftText: "IDX of trigger parameter"
 		anchors {
 			left: parent.left
-			top: myLabel3.bottom
+			top: myLabel6.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 10 : 8
+			topMargin: isNxt ? 8 : 6
 		}
 
 		onClicked: {
@@ -203,15 +276,15 @@ Screen {
 	}
 
 	Text {
-		id: myLabel4
+		id: myLabel8
 		text: "Name of Domoticz variable. Example of valid name:  ShowDoorCamToon "
-		font.pixelSize:  isNxt ? 20 : 16
+		font.pixelSize: isNxt ? 18:14
 		font.family: qfont.regular.name
 		anchors {
 			left: parent.left
 			top: domoticzIDX.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 20 : 15
+			topMargin: isNxt ? 8 : 6
 		}
 		visible: app.domMode
 	}
@@ -224,9 +297,9 @@ Screen {
 		leftText: "Name of trigger parameter"
 		anchors {
 			left: parent.left
-			top: myLabel4.bottom
+			top: myLabel8.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 10 : 8
+			topMargin: isNxt ? 8 : 6
 		}
 
 		onClicked: {
@@ -236,15 +309,15 @@ Screen {
 	}
 
 	Text {
-		id: myLabel5
+		id: myLabel9
 		text: "Example of valid URL: http://192.168.10.185:8123 :"
-		font.pixelSize:  isNxt ? 20 : 16
+		font.pixelSize: isNxt ? 18:14
 		font.family: qfont.regular.name
 		anchors {
 			left: parent.left
 			top: domhaToggle.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 20 : 15
+			topMargin: isNxt ? 8 : 6
 		}
 		visible: !app.domMode
 	}
@@ -258,9 +331,9 @@ Screen {
 		leftText: "HA URL"
 		anchors {
 			left: parent.left
-			top: myLabel5.bottom
+			top: myLabel9.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 10 : 8
+			topMargin: isNxt ? 8 : 6
 		}
 		onClicked: {
 			qkeyboard.open("URL", haURL1.inputText, savehaURL1)
@@ -269,15 +342,15 @@ Screen {
 	}
 
 	Text {
-		id: myLabel6
+		id: myLabel11
 		text: "Helper Entity_id in Home Assistant. Example : input_number.showdoorcamtoon :"
-		font.pixelSize:  isNxt ? 20 : 16
+		font.pixelSize: isNxt ? 18:14
 		font.family: qfont.regular.name
 		anchors {
 			left: parent.left
 			top: haURL1.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 20 : 15
+			topMargin: isNxt ? 8 : 6
 		}
 		visible: !app.domMode
 	}
@@ -290,9 +363,9 @@ Screen {
 		leftText: "Entity_id"
 		anchors {
 			left: parent.left
-			top: myLabel6.bottom
+			top: myLabel11.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 10 : 8
+			topMargin: isNxt ? 8 : 6
 		}
 
 		onClicked: {
@@ -302,15 +375,15 @@ Screen {
 	}
 
 	Text {
-		id: myLabel7
+		id: myLabel13
 		text: "Home Assistant long-lived access token :"
-		font.pixelSize:  isNxt ? 20 : 16
+		font.pixelSize: isNxt ? 18:14
 		font.family: qfont.regular.name
 		anchors {
 			left: parent.left
 			top: haEntity_id.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 20 : 15
+			topMargin: isNxt ? 8 : 6
 		}
 		visible: !app.domMode
 	}
@@ -323,9 +396,9 @@ Screen {
 		leftText: "Token"
 		anchors {
 			left: parent.left
-			top: myLabel7.bottom
+			top: myLabel13.bottom
 			leftMargin: 20
-			topMargin: isNxt ? 10 : 8
+			topMargin: isNxt ? 8 : 6
 		}
 
 		onClicked: {
@@ -338,7 +411,7 @@ Screen {
 		id: forceMode
 		width:  160
 		text: "force 16:9"
-		font.pixelSize:  isNxt ? 20 : 16
+		font.pixelSize: isNxt ? 18:14
 		font.family: qfont.regular.name
 
 		anchors {

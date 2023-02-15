@@ -1,3 +1,6 @@
+Version 1.3.2
+Added option for hi3510 CGI camera
+
 
 Version 1.3.1
 Minor changes in config screen for Toon 1 resolution
