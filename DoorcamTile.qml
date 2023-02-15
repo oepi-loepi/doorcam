@@ -88,7 +88,7 @@ Tile {
 		haURl2 += "/api/states/"
 		haURl2 += app.haEntity_id
 
-		console.log("doorcam: haURl2: " + haURl2)
+		if (app.debugOutput) console.log("doorcam: haURl2: " + haURl2)
 
 
 		doc.open("GET", haURl2, true);
