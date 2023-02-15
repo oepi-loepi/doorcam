@@ -4,6 +4,7 @@ import qb.components 1.0
 
 Tile {
 	id: doorcamTile
+	property bool dimState: screenStateController.dimmedColors
 
 	function init() {}
 
@@ -19,7 +20,7 @@ Tile {
 		var doc = new XMLHttpRequest();
 		doc.onreadystatechange = function() {
 			if (doc.readyState == XMLHttpRequest.DONE) {
-				if (doc.status === 200 || http.status === 300  || http.status === 302) {
+				if (doc.status === 200 || doc.status === 300  || doc.status === 302) {
 					if (app.debugOutput) console.log("doorcam: responseText: " +  doc.responseText)
 					var JsonString = doc.responseText;
 					var JsonObject= JSON.parse(JsonString);
@@ -56,7 +57,7 @@ Tile {
 		var doc = new XMLHttpRequest();
 		doc.onreadystatechange = function() {
 			if (doc.readyState == XMLHttpRequest.DONE) {
-				if (doc.status === 200 || http.status === 300  || http.status === 302) {
+				if (doc.status === 200 || doc.status === 300  || doc.status === 302) {
 					var JsonString = doc.responseText;
 
 					if (app.debugOutput) console.log(JsonString)
@@ -87,6 +88,9 @@ Tile {
 		haURl2 += "/api/states/"
 		haURl2 += app.haEntity_id
 
+		console.log("doorcam: haURl2: " + haURl2)
+
+
 		doc.open("GET", haURl2, true);
 		doc.setRequestHeader("Authorization", "Bearer " + app.haToken);
 		doc.setRequestHeader("Content-Type", "application/json");
@@ -102,19 +106,20 @@ Tile {
 			horizontalCenter: parent.horizontalCenter
 		}
 		cache: false
+		visible: !dimState
 	}
 
 	Text {
 		id: mytext
 		text: "DoorCam"
-
+		color: dimmableColors.clockTileColor
 		font {
 			family: qfont.semiBold.name
 			pixelSize: 24
 		}
 
 		anchors {
-			bottom: parent.bottom
+			bottom: dimState? parent.verticalCenter:parent.bottom
 			bottomMargin: 5
 			horizontalCenter: parent.horizontalCenter
 		}
