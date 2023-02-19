@@ -1,5 +1,6 @@
 import QtQuick 2.1
 import qb.components 1.0
+import ScreenStateController 1.0
 
 Screen {
 	id: doorcamFullScreen
@@ -15,6 +16,8 @@ Screen {
 		console.log("webcam: WebcamFullScreen.onShown() called")
 		addCustomTopRightButton("Configuratie")
 		screenStateController.screenColorDimmedIsReachable = false
+screenStateController.wakeup();
+//screenStateController.forceTestScreenState(1)
 		if (app.cgiMode){
 			app.doorcamTimer1Interval = 2000
 		}else{
@@ -90,11 +93,10 @@ Screen {
                 	doc.setRequestHeader("Authorization", "Bearer " + app.haToken);
                 	doc.setRequestHeader("Content-Type", "application/json");
                 	doc.send(params);
-			this.close();		
+	
 		}
 		app.doorcamImage1Source = "qrc:/tsc/connect.jpg";
 		app.doorcamImage2Source = "qrc:/tsc/connect.jpg";
-		this.close();
 	}
 
 

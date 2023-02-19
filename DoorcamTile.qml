@@ -89,8 +89,6 @@ Tile {
 		haURl2 += app.haEntity_id
 
 		if (app.debugOutput) console.log("doorcam: haURl2: " + haURl2)
-
-
 		doc.open("GET", haURl2, true);
 		doc.setRequestHeader("Authorization", "Bearer " + app.haToken);
 		doc.setRequestHeader("Content-Type", "application/json");

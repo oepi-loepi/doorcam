@@ -1,3 +1,6 @@
+Version 1.3.4
+Screen to wakeup state wehen opened
+
 Version 1.3.3
 Small error solved
 
