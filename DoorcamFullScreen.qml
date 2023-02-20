@@ -1,6 +1,6 @@
 import QtQuick 2.1
 import qb.components 1.0
-import ScreenStateController 1.0
+
 
 Screen {
 	id: doorcamFullScreen
@@ -15,9 +15,6 @@ Screen {
 	onShown: {
 		console.log("webcam: WebcamFullScreen.onShown() called")
 		addCustomTopRightButton("Configuratie")
-		screenStateController.screenColorDimmedIsReachable = false
-screenStateController.wakeup();
-//screenStateController.forceTestScreenState(1)
 		if (app.cgiMode){
 			app.doorcamTimer1Interval = 2000
 		}else{
